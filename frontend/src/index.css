@@ -1,0 +1,251 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-leetcode-bg-dark text-leetcode-text-primary;
+    overflow-x: hidden;
+  }
+}
+
+/* Custom Animations */
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+@keyframes pulse-glow {
+  0% {
+    filter: drop-shadow(0 0 0.75rem rgba(10, 132, 255, 0.2));
+  }
+  50% {
+    filter: drop-shadow(0 0 1.5rem rgba(10, 132, 255, 0.5));
+  }
+  100% {
+    filter: drop-shadow(0 0 0.75rem rgba(10, 132, 255, 0.2));
+  }
+}
+
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -100% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes typing {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+.animate-float {
+  animation: float 5s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+.animate-rotate {
+  animation: rotate 8s linear infinite;
+}
+
+.animate-bounce-slow {
+  animation: bounce 3s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+.animate-typing {
+  display: inline-block;
+  overflow: hidden;
+  white-space: nowrap;
+  animation: typing 3.5s steps(40, end);
+}
+
+.gradient-background {
+  background: linear-gradient(-45deg, #1A1F2C, #282C34, #0A84FF, #2CBB5D);
+  background-size: 400% 400%;
+  animation: gradient-shift 15s ease infinite;
+}
+
+.hover-lift {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+}
+
+.hover-glow {
+  transition: box-shadow 0.3s ease, transform 0.2s ease;
+}
+
+.hover-glow:hover {
+  box-shadow: 0 0 15px rgba(10, 132, 255, 0.5);
+  transform: scale(1.02);
+}
+
+.hover-scale {
+  transition: transform 0.2s ease;
+}
+
+.hover-scale:hover {
+  transform: scale(1.05);
+}
+
+.hover-rotate {
+  transition: transform 0.3s ease;
+}
+
+.hover-rotate:hover {
+  transform: rotate(5deg);
+}
+
+/* Code editor styling */
+.code-editor {
+  font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+}
+
+.code-editor pre {
+  padding: 1rem;
+  border-radius: 0.375rem;
+  background-color: theme('colors.leetcode.bg-medium');
+  overflow-x: auto;
+}
+
+.problem-description h1, 
+.problem-description h2, 
+.problem-description h3 {
+  @apply font-semibold mb-2;
+}
+
+.problem-description p {
+  @apply mb-4;
+}
+
+.problem-description ul, 
+.problem-description ol {
+  @apply mb-4 pl-5;
+}
+
+.problem-description li {
+  @apply mb-1;
+}
+
+.problem-description pre {
+  @apply bg-leetcode-bg-medium p-3 rounded my-3 overflow-x-auto;
+}
+
+/* Modern scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: theme('colors.leetcode.bg-dark');
+}
+
+::-webkit-scrollbar-thumb {
+  background: theme('colors.leetcode.bg-light');
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: theme('colors.leetcode.text-secondary');
+}
