@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { Code, List, Trophy, Search, Menu, LogIn } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Code, List, Trophy, Search, Menu, LogIn, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -8,18 +8,23 @@ const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+
   const location = useLocation();
+  const navigate = useNavigate();
   const isHomePage = location.pathname === "/";
 
   const isActive = (path: string) => location.pathname === path;
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
-    };
+    const handleScroll = () => setIsScrolled(window.scrollY > 10);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  const handleLogout = () => {
+    console.log("Logging out...");
+  };
 
   return (
     <nav
@@ -28,6 +33,7 @@ const Navbar = () => {
       }`}
     >
       <div className="max-w-7xl mx-auto flex items-center justify-between h-14 px-4">
+        {/* Left side: Logo/Brand */}
         <div className="flex items-center gap-2">
           <Code className="h-6 w-6 text-leetcode-blue animate-pulse" />
           <Link
@@ -38,6 +44,7 @@ const Navbar = () => {
           </Link>
         </div>
 
+        {/* Center Nav Links (only if not on home) */}
         {!isHomePage && (
           <div className="hidden md:flex items-center gap-6 ml-8">
             <Link
@@ -88,7 +95,8 @@ const Navbar = () => {
               />
             </div>
           )}
-          {isHomePage && (
+
+          {isHomePage ? (
             <div className="hidden md:flex items-center gap-2">
               <Link to="/login">
                 <Button
@@ -108,19 +116,56 @@ const Navbar = () => {
                 </Button>
               </Link>
             </div>
+          ) : (
+            <div className="relative">
+              <button
+                onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+                className="p-2 hover:bg-leetcode-bg-light rounded focus:outline-none
+                           text-leetcode-text-secondary hover:text-leetcode-text-primary
+                           transition-colors"
+              >
+                <User className="h-5 w-5" />
+              </button>
+
+              {showProfileDropdown && (
+                <div
+                  className="absolute right-0 mt-2 w-32 bg-leetcode-bg-light
+                             rounded shadow-md overflow-hidden z-50"
+                >
+                  <Link
+                    to="/settings"
+                    className="block px-4 py-2 text-sm hover:bg-leetcode-bg-medium
+                               text-leetcode-text-primary"
+                    onClick={() => setShowProfileDropdown(false)}
+                  >
+                    Settings
+                  </Link>
+                  <button
+                    onClick={() => {
+                      setShowProfileDropdown(false);
+                      handleLogout();
+                    }}
+                    className="block w-full text-left px-4 py-2 text-sm hover:bg-leetcode-bg-medium
+                               text-leetcode-text-primary"
+                  >
+                    Log Out
+                  </button>
+                </div>
+              )}
+            </div>
           )}
         </div>
       </div>
+
       {isHomePage && (
         <Button
           variant="ghost"
-          className="md:hidden text-leetcode-text-secondary hover:text-leetcode-text-primary "
+          className="md:hidden text-leetcode-text-secondary hover:text-leetcode-text-primary"
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         >
           <Menu className="h-5 w-5" />
         </Button>
       )}
-      {/* Mobile Menu */}
 
       <div
         className={`md:hidden transition-all duration-300 overflow-hidden ${
@@ -128,7 +173,6 @@ const Navbar = () => {
         }`}
       >
         <div className="px-4 py-3 bg-leetcode-bg-dark flex flex-col gap-4">
-          {/* Problems & Quiz - Only show when not on homepage */}
           {!isHomePage && (
             <>
               <Link
@@ -159,7 +203,6 @@ const Navbar = () => {
             </>
           )}
 
-          {/* Login & Sign Up - Always shown */}
           <div className="flex flex-col gap-2 pt-2 border-t border-leetcode-bg-light">
             <Link
               to="/login"
