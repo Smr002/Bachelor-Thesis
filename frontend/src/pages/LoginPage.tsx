@@ -1,4 +1,5 @@
 import React from "react";
+import { loginUser } from "../api";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,7 +25,6 @@ import { useForm } from "react-hook-form";
 import { LogIn, Mail, Lock } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
-// Form schema with validation
 const formSchema = z.object({
   email: z
     .string()
@@ -48,19 +48,35 @@ const LoginPage = () => {
     },
   });
 
-  const onSubmit = (values: FormValues) => {
-    console.log("Login attempt:", values);
+  const onSubmit = async (values: FormValues) => {
+    try {
+      const { token, user } = await loginUser(
+        values as { email: string; password: string }
+      );
 
-    // This is a placeholder - replace with actual authentication
-    toast({
-      title: "Login Successful",
-      description: "Welcome back to AlgoStruct!",
-    });
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
 
-    // Redirect to home page after "login"
-    setTimeout(() => {
-      navigate("/");
-    }, 1500);
+      toast({
+        title: "Login Successful",
+        description: `Welcome back, ${user.name}!`,
+      });
+
+      // Redirect based on role
+      setTimeout(() => {
+        if (user.role === "professor") {
+          navigate("/admin");
+        } else {
+          navigate("/home");
+        }
+      }, 1000);
+    } catch (err: any) {
+      toast({
+        title: "Login Failed",
+        description: err.message || "Invalid email or password.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (

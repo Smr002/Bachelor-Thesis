@@ -1,4 +1,5 @@
 import React from "react";
+import { createUser } from "../api";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -62,19 +63,30 @@ const SignUpPage = () => {
     },
   });
 
-  const onSubmit = (values: FormValues) => {
-    console.log("Sign up data:", values);
+  const onSubmit = async (values: FormValues) => {
+    try {
+      await createUser({
+        name: values.username,
+        email: values.email,
+        password: values.password,
+        role: "student",
+      });
 
-    // This is a placeholder - replace with actual registration logic
-    toast({
-      title: "Registration Successful",
-      description: "Your account has been created successfully!",
-    });
+      toast({
+        title: "Registration Successful",
+        description: "Your account has been created successfully!",
+      });
 
-    // Redirect to login page after "registration"
-    setTimeout(() => {
-      navigate("/login");
-    }, 1500);
+      setTimeout(() => {
+        navigate("/login");
+      }, 1500);
+    } catch (error: any) {
+      toast({
+        title: "Registration Failed",
+        description: error.message || "An error occurred during registration.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
