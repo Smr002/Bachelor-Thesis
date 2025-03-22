@@ -14,6 +14,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import LoginPage from "./pages/LoginPage";
 import SignUpPage from "./pages/SignUpPage";
 import Home from "./pages/Home";
+import PrivateRoute from "@/components/PrivateRoute";
 
 const queryClient = new QueryClient();
 
@@ -48,85 +49,97 @@ const AnimatedRoutes = () => {
         <Route
           path="/home"
           element={
-            <motion.div
-              variants={pageVariants}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              transition={{ duration: 0.4, ease: "easeInOut" }}
-            >
-              <Home />
-            </motion.div>
+            <PrivateRoute>
+              <motion.div
+                variants={pageVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                transition={{ duration: 0.4, ease: "easeInOut" }}
+              >
+                <Home />
+              </motion.div>
+            </PrivateRoute>
           }
         />
         <Route
           path="/problems"
           element={
-            <motion.div
-              variants={pageVariants}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              transition={{ duration: 0.4, ease: "easeInOut" }}
-            >
-              <ProblemsPage />
-            </motion.div>
+            <PrivateRoute>
+              <motion.div
+                variants={pageVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                transition={{ duration: 0.4, ease: "easeInOut" }}
+              >
+                <ProblemsPage />
+              </motion.div>
+            </PrivateRoute>
           }
         />
         <Route
           path="/problem/:id"
           element={
-            <motion.div
-              variants={pageVariants}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              transition={{ duration: 0.4, ease: "easeInOut" }}
-            >
-              <ProblemPage />
-            </motion.div>
+            <PrivateRoute>
+              <motion.div
+                variants={pageVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                transition={{ duration: 0.4, ease: "easeInOut" }}
+              >
+                <ProblemPage />
+              </motion.div>
+            </PrivateRoute>
           }
         />
         <Route
           path="/snippets"
           element={
-            <motion.div
-              variants={pageVariants}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              transition={{ duration: 0.4, ease: "easeInOut" }}
-            >
-              <CodeSnippetsPage />
-            </motion.div>
+            <PrivateRoute>
+              <motion.div
+                variants={pageVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                transition={{ duration: 0.4, ease: "easeInOut" }}
+              >
+                <CodeSnippetsPage />
+              </motion.div>
+            </PrivateRoute>
           }
         />
         <Route
           path="/quiz"
           element={
-            <motion.div
-              variants={pageVariants}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              transition={{ duration: 0.4, ease: "easeInOut" }}
-            >
-              <PopQuizPage />
-            </motion.div>
+            <PrivateRoute>
+              <motion.div
+                variants={pageVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                transition={{ duration: 0.4, ease: "easeInOut" }}
+              >
+                <PopQuizPage />
+              </motion.div>
+            </PrivateRoute>
           }
         />
         <Route
           path="/admin"
           element={
-            <motion.div
-              variants={pageVariants}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              transition={{ duration: 0.4, ease: "easeInOut" }}
-            >
-              <AdminDashboard />
-            </motion.div>
+            <PrivateRoute>
+              <motion.div
+                variants={pageVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                transition={{ duration: 0.4, ease: "easeInOut" }}
+              >
+                <AdminDashboard />
+              </motion.div>
+            </PrivateRoute>
           }
         />
         <Route
