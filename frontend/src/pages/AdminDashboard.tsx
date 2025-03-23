@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { Shield, List, Users, Brain, Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Shield, List, Users, Brain, LogOut, Settings } from "lucide-react";
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Card,
@@ -10,9 +10,18 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+
 import { QuestionsManager } from "@/components/admin/QuestionsManager";
 import { UsersManager } from "@/components/admin/UsersManager";
 import { QuizCreator } from "@/components/admin/QuizCreator";
+import { Button } from "@/components/ui/button";
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState("questions");
@@ -36,11 +45,44 @@ const AdminDashboard = () => {
       exit="exit"
       transition={{ duration: 0.4 }}
     >
-      <div className="flex items-center mb-8">
-        <Shield className="h-8 w-8 text-leetcode-blue mr-3" />
-        <h1 className="text-3xl font-bold text-leetcode-text-primary">
-          {capitalize(user.role)} {capitalize(user.name)} Dashboard
-        </h1>
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center mb-8">
+          <Shield className="h-8 w-8 text-leetcode-blue mr-3" />
+          <h1 className="text-3xl font-bold text-leetcode-text-primary">
+            {capitalize(user.role)} {capitalize(user.name)} Dashboard
+          </h1>
+        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="p-0">
+              <Users className=" text-leetcode-text-primary hover:text-leetcode-blue" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            align="end"
+            className="w-40 bg-leetcode-bg-medium text-leetcode-text-primary"
+          >
+            <DropdownMenuItem
+              onClick={() => {
+                console.log("Go to settings");
+              }}
+            >
+              <Settings className="h-4 w-4 mr-2" />
+              Settings
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={() => {
+                localStorage.removeItem("token");
+                localStorage.removeItem("user");
+                window.location.href = "/login";
+              }}
+            >
+              <LogOut className="h-4 w-4 mr-2" />
+              Logout
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       <Tabs
