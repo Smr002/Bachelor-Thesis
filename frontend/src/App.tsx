@@ -2,7 +2,13 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import HomePage from "./pages/HomePage";
 import ProblemsPage from "./pages/ProblemsPage";
@@ -15,17 +21,42 @@ import LoginPage from "./pages/LoginPage";
 import SignUpPage from "./pages/SignUpPage";
 import Home from "./pages/Home";
 import PrivateRoute from "@/components/PrivateRoute";
+import { jwtDecode } from "jwt-decode";
+import { useEffect } from "react";
 
+const navigate = useNavigate();
 const queryClient = new QueryClient();
+interface DecodedToken {
+  exp: number;
+  [key: string]: any;
+}
 
-// Animation variants
 const pageVariants = {
   initial: { opacity: 0, y: 20 },
   animate: { opacity: 1, y: 0 },
   exit: { opacity: 0, y: -20 },
 };
+useEffect(() => {
+  const token = localStorage.getItem("token");
+  if (token) {
+    try {
+      const decoded = jwtDecode<DecodedToken>(token);
+      const now = Date.now() / 1000;
 
-// Wrapper component for AnimatePresence
+      if (decoded.exp < now) {
+        console.log("Auto-logging out due to token expiration.");
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        navigate("/");
+      }
+    } catch {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      navigate("/login");
+    }
+  }
+}, []);
+
 const AnimatedRoutes = () => {
   const location = useLocation();
 

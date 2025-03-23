@@ -3,6 +3,11 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Code, List, Trophy, Search, Menu, LogIn, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { jwtDecode } from "jwt-decode";
+interface DecodedToken {
+  exp: number;
+  [key: string]: any;
+}
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -23,7 +28,26 @@ const Navbar = () => {
   }, []);
 
   const handleLogout = () => {
-    console.log("Logging out...");
+    const token = localStorage.getItem("token");
+
+    if (token) {
+      try {
+        const decoded = jwtDecode<DecodedToken>(token);
+        const now = Date.now() / 1000;
+
+        if (decoded.exp < now) {
+          console.log("Token expired.");
+        } else {
+          console.log("Logging out manually.");
+        }
+      } catch (error) {
+        console.error("Invalid token.");
+      }
+    }
+
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    navigate("/");
   };
 
   return (

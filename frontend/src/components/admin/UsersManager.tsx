@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   Eye,
@@ -8,7 +8,6 @@ import {
   Check,
   X,
   Mail,
-  Pencil,
   MailCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -20,7 +19,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -32,65 +31,56 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/use-toast";
-
-// Mock user data - in a real app, this would come from a database
-const mockUsers = [
-  {
-    id: 1,
-    name: "John Doe",
-    email: "john@example.com",
-    role: "student",
-    status: "active",
-    joined: "2023-04-15",
-  },
-  {
-    id: 2,
-    name: "Jane Smith",
-    email: "jane@example.com",
-    role: "student",
-    status: "active",
-    joined: "2023-05-22",
-  },
-  {
-    id: 3,
-    name: "Alice Johnson",
-    email: "alice@example.com",
-    role: "admin",
-    status: "active",
-    joined: "2023-03-10",
-  },
-  {
-    id: 4,
-    name: "Bob Wilson",
-    email: "bob@example.com",
-    role: "student",
-    status: "inactive",
-    joined: "2023-06-05",
-  },
-  {
-    id: 5,
-    name: "Eva Brown",
-    email: "eva@example.com",
-    role: "student",
-    status: "active",
-    joined: "2023-07-12",
-  },
-];
+import { createUser, getUsers } from "@/api";
+import { CreateUserDto } from "@/types/user";
+import { ClipLoader } from "react-spinners";
+import { DecodedToken } from "@/types/user";
+import { jwtDecode } from "jwt-decode";
 
 export const UsersManager = () => {
-  const [users, setUsers] = useState(mockUsers);
+  const [users, setUsers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
-  const [newUser, setNewUser] = useState({
+  const [newUser, setNewUser] = useState<CreateUserDto>({
     name: "",
     email: "",
-    role: "student",
     password: "",
+    role: "student",
   });
   const [inviteEmail, setInviteEmail] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleAddUser = () => {
+  useEffect(() => {
+    const fetchUsersFromApi = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) throw new Error("No token found");
+
+        const decoded: DecodedToken = jwtDecode(token);
+        console.log("Decoded role from token:", decoded.role);
+
+        let data = await getUsers(token);
+
+        if (decoded.role === "professor") {
+          data = data.filter((user: any) => user.role !== "professor");
+        }
+
+        setUsers(data);
+      } catch (error: any) {
+        toast({
+          title: "Error loading users",
+          description: error.message,
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUsersFromApi();
+  }, []);
+  const handleAddUser = async () => {
     if (!newUser.name || !newUser.email || !newUser.password) {
       toast({
         title: "Missing information",
@@ -100,28 +90,23 @@ export const UsersManager = () => {
       return;
     }
 
-    const id = Math.max(...users.map((u) => u.id)) + 1;
-    const today = new Date().toISOString().split("T")[0];
+    try {
+      const created = await createUser(newUser);
+      setUsers([...users, created]);
+      setNewUser({ name: "", email: "", password: "", role: "student" });
+      setIsAddDialogOpen(false);
 
-    setUsers([
-      ...users,
-      {
-        id,
-        name: newUser.name,
-        email: newUser.email,
-        role: newUser.role,
-        status: "active",
-        joined: today,
-      },
-    ]);
-
-    setNewUser({ name: "", email: "", role: "student", password: "" });
-    setIsAddDialogOpen(false);
-
-    toast({
-      title: "User added",
-      description: "The user has been successfully added.",
-    });
+      toast({
+        title: "User added",
+        description: "The user has been successfully created.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Failed to add user",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
   };
 
   const handleInviteUser = () => {
@@ -145,7 +130,6 @@ export const UsersManager = () => {
 
   const handleDeleteUser = (id: number) => {
     setUsers(users.filter((user) => user.id !== id));
-
     toast({
       title: "User removed",
       description: "The user has been successfully removed.",
@@ -203,103 +187,82 @@ export const UsersManager = () => {
 
       <Card className="bg-leetcode-bg-dark border-leetcode-bg-light overflow-hidden">
         <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="text-leetcode-text-secondary">
-                  ID
-                </TableHead>
-                <TableHead className="text-leetcode-text-secondary">
-                  Name
-                </TableHead>
-                <TableHead className="text-leetcode-text-secondary">
-                  Email
-                </TableHead>
-                <TableHead className="text-leetcode-text-secondary">
-                  Role
-                </TableHead>
-                <TableHead className="text-leetcode-text-secondary">
-                  Status
-                </TableHead>
-                <TableHead className="text-leetcode-text-secondary">
-                  Joined Date
-                </TableHead>
-                <TableHead className="text-leetcode-text-secondary">
-                  Actions
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {users.map((user) => (
-                <TableRow key={user.id} className="border-leetcode-bg-light">
-                  <TableCell className="text-leetcode-text-primary">
-                    {user.id}
-                  </TableCell>
-                  <TableCell className="text-leetcode-text-primary font-medium">
-                    {user.name}
-                  </TableCell>
-                  <TableCell className="text-leetcode-text-primary">
-                    {user.email}
-                  </TableCell>
-                  <TableCell>
-                    <span
-                      className={`px-2 py-1 rounded text-xs font-medium ${
-                        user.role === "admin"
-                          ? "bg-purple-500/20 text-purple-400"
-                          : "bg-blue-500/20 text-blue-400"
-                      }`}
-                    >
-                      {user.role}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <span
-                      className={`px-2 py-1 rounded text-xs font-medium ${
-                        user.status === "active"
-                          ? "bg-leetcode-green/20 text-leetcode-green"
-                          : "bg-leetcode-red/20 text-leetcode-red"
-                      }`}
-                    >
-                      {user.status}
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-leetcode-text-primary">
-                    {user.joined}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex space-x-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleToggleStatus(user.id)}
-                        className={
-                          user.status === "active"
-                            ? "text-leetcode-red border-leetcode-red hover:bg-leetcode-red/10"
-                            : "text-leetcode-green border-leetcode-green hover:bg-leetcode-green/10"
-                        }
-                      >
-                        {user.status === "active" ? (
-                          <X className="h-4 w-4" />
-                        ) : (
-                          <Check className="h-4 w-4" />
-                        )}
-                        <span className="sr-only">Toggle Status</span>
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="text-leetcode-red border-leetcode-red hover:bg-leetcode-red/10"
-                        onClick={() => handleDeleteUser(user.id)}
-                      >
-                        <Trash className="h-4 w-4" />
-                        <span className="sr-only">Delete</span>
-                      </Button>
-                    </div>
-                  </TableCell>
+          {loading ? (
+            <div className="text-center p-10">
+              <ClipLoader color="#00BFFF" size={40} />
+              <p className="text-leetcode-text-secondary mt-2">
+                Loading users...
+              </p>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>ID</TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Role</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Joined</TableHead>
+                  <TableHead>Actions</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {users.map((user) => (
+                  <TableRow key={user.id}>
+                    <TableCell>{user.id}</TableCell>
+                    <TableCell>{user.name}</TableCell>
+                    <TableCell>{user.email}</TableCell>
+                    <TableCell>
+                      <span
+                        className={`px-2 py-1 rounded text-xs font-medium ${
+                          user.role === "admin"
+                            ? "bg-purple-500/20 text-purple-400"
+                            : "bg-blue-500/20 text-blue-400"
+                        }`}
+                      >
+                        {user.role}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <span
+                        className={`px-2 py-1 rounded text-xs font-medium ${
+                          user.status === "active"
+                            ? "bg-leetcode-green/20 text-leetcode-green"
+                            : "bg-leetcode-red/20 text-leetcode-red"
+                        }`}
+                      >
+                        {user.status}
+                      </span>
+                    </TableCell>
+                    <TableCell>{user.joined || "-"}</TableCell>
+                    <TableCell>
+                      <div className="flex space-x-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleToggleStatus(user.id)}
+                        >
+                          {user.status === "active" ? (
+                            <X className="h-4 w-4" />
+                          ) : (
+                            <Check className="h-4 w-4" />
+                          )}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDeleteUser(user.id)}
+                        >
+                          <Trash className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
         </div>
       </Card>
 
@@ -353,7 +316,10 @@ export const UsersManager = () => {
                 id="role"
                 value={newUser.role}
                 onChange={(e) =>
-                  setNewUser({ ...newUser, role: e.target.value })
+                  setNewUser({
+                    ...newUser,
+                    role: e.target.value as "student" | "professor",
+                  })
                 }
                 className="col-span-3 bg-leetcode-bg-dark border border-leetcode-bg-light rounded-md h-10 px-3 text-leetcode-text-primary"
               >
@@ -412,16 +378,13 @@ export const UsersManager = () => {
 
       {/* Invite User Dialog */}
       <Dialog open={isInviteDialogOpen} onOpenChange={setIsInviteDialogOpen}>
-        <DialogContent className="bg-leetcode-bg-medium border-leetcode-bg-light text-leetcode-text-primary">
+        <DialogContent>
           <DialogHeader>
-            <DialogTitle className="text-leetcode-text-primary">
-              Invite User
-            </DialogTitle>
-            <DialogDescription className="text-leetcode-text-secondary">
-              Send an invitation email to join the platform.
+            <DialogTitle>Invite User</DialogTitle>
+            <DialogDescription>
+              Send an invitation email to a user.
             </DialogDescription>
           </DialogHeader>
-
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="invite-email" className="text-right">
@@ -429,27 +392,21 @@ export const UsersManager = () => {
               </Label>
               <Input
                 id="invite-email"
-                type="email"
                 value={inviteEmail}
                 onChange={(e) => setInviteEmail(e.target.value)}
-                className="col-span-3 bg-leetcode-bg-dark border-leetcode-bg-light text-leetcode-text-primary"
+                className="col-span-3"
                 placeholder="user@example.com"
               />
             </div>
           </div>
-
           <DialogFooter>
             <Button
               variant="outline"
               onClick={() => setIsInviteDialogOpen(false)}
-              className="border-leetcode-bg-light text-leetcode-text-secondary"
             >
               Cancel
             </Button>
-            <Button
-              onClick={handleInviteUser}
-              className="bg-leetcode-blue hover:bg-leetcode-blue/90"
-            >
+            <Button onClick={handleInviteUser}>
               <MailCheck className="h-4 w-4 mr-2" />
               Send Invitation
             </Button>

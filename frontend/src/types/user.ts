@@ -21,3 +21,10 @@ export interface AuthResponse {
   token: string;
   user: User;
 }
+
+export interface DecodedToken {
+  id: number;
+  name: string;
+  email: string;
+  role: string;
+}
