@@ -24,8 +24,8 @@ import PrivateRoute from "@/components/PrivateRoute";
 import { jwtDecode } from "jwt-decode";
 import { useEffect } from "react";
 
-const navigate = useNavigate();
 const queryClient = new QueryClient();
+
 interface DecodedToken {
   exp: number;
   [key: string]: any;
@@ -36,29 +36,31 @@ const pageVariants = {
   animate: { opacity: 1, y: 0 },
   exit: { opacity: 0, y: -20 },
 };
-useEffect(() => {
-  const token = localStorage.getItem("token");
-  if (token) {
-    try {
-      const decoded = jwtDecode<DecodedToken>(token);
-      const now = Date.now() / 1000;
-
-      if (decoded.exp < now) {
-        console.log("Auto-logging out due to token expiration.");
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
-        navigate("/");
-      }
-    } catch {
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-      navigate("/login");
-    }
-  }
-}, []);
 
 const AnimatedRoutes = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const decoded = jwtDecode<DecodedToken>(token);
+        const now = Date.now() / 1000;
+
+        if (decoded.exp < now) {
+          console.log("Auto-logging out due to token expiration.");
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          navigate("/login");
+        }
+      } catch {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        navigate("/login");
+      }
+    }
+  }, [navigate]);
 
   return (
     <AnimatePresence mode="wait">
@@ -66,30 +68,18 @@ const AnimatedRoutes = () => {
         <Route
           path="/"
           element={
-            <motion.div
-              variants={pageVariants}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              transition={{ duration: 0.4, ease: "easeInOut" }}
-            >
+            <PageWrapper>
               <HomePage />
-            </motion.div>
+            </PageWrapper>
           }
         />
         <Route
           path="/home"
           element={
             <PrivateRoute>
-              <motion.div
-                variants={pageVariants}
-                initial="initial"
-                animate="animate"
-                exit="exit"
-                transition={{ duration: 0.4, ease: "easeInOut" }}
-              >
+              <PageWrapper>
                 <Home />
-              </motion.div>
+              </PageWrapper>
             </PrivateRoute>
           }
         />
@@ -97,15 +87,9 @@ const AnimatedRoutes = () => {
           path="/problems"
           element={
             <PrivateRoute>
-              <motion.div
-                variants={pageVariants}
-                initial="initial"
-                animate="animate"
-                exit="exit"
-                transition={{ duration: 0.4, ease: "easeInOut" }}
-              >
+              <PageWrapper>
                 <ProblemsPage />
-              </motion.div>
+              </PageWrapper>
             </PrivateRoute>
           }
         />
@@ -113,15 +97,9 @@ const AnimatedRoutes = () => {
           path="/problem/:id"
           element={
             <PrivateRoute>
-              <motion.div
-                variants={pageVariants}
-                initial="initial"
-                animate="animate"
-                exit="exit"
-                transition={{ duration: 0.4, ease: "easeInOut" }}
-              >
+              <PageWrapper>
                 <ProblemPage />
-              </motion.div>
+              </PageWrapper>
             </PrivateRoute>
           }
         />
@@ -129,15 +107,9 @@ const AnimatedRoutes = () => {
           path="/snippets"
           element={
             <PrivateRoute>
-              <motion.div
-                variants={pageVariants}
-                initial="initial"
-                animate="animate"
-                exit="exit"
-                transition={{ duration: 0.4, ease: "easeInOut" }}
-              >
+              <PageWrapper>
                 <CodeSnippetsPage />
-              </motion.div>
+              </PageWrapper>
             </PrivateRoute>
           }
         />
@@ -145,15 +117,9 @@ const AnimatedRoutes = () => {
           path="/quiz"
           element={
             <PrivateRoute>
-              <motion.div
-                variants={pageVariants}
-                initial="initial"
-                animate="animate"
-                exit="exit"
-                transition={{ duration: 0.4, ease: "easeInOut" }}
-              >
+              <PageWrapper>
                 <PopQuizPage />
-              </motion.div>
+              </PageWrapper>
             </PrivateRoute>
           }
         />
@@ -161,64 +127,53 @@ const AnimatedRoutes = () => {
           path="/admin"
           element={
             <PrivateRoute>
-              <motion.div
-                variants={pageVariants}
-                initial="initial"
-                animate="animate"
-                exit="exit"
-                transition={{ duration: 0.4, ease: "easeInOut" }}
-              >
+              <PageWrapper>
                 <AdminDashboard />
-              </motion.div>
+              </PageWrapper>
             </PrivateRoute>
           }
         />
         <Route
           path="/login"
           element={
-            <motion.div
-              variants={pageVariants}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              transition={{ duration: 0.4, ease: "easeInOut" }}
-            >
+            <PageWrapper>
               <LoginPage />
-            </motion.div>
+            </PageWrapper>
           }
         />
         <Route
           path="/signup"
           element={
-            <motion.div
-              variants={pageVariants}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              transition={{ duration: 0.4, ease: "easeInOut" }}
-            >
+            <PageWrapper>
               <SignUpPage />
-            </motion.div>
+            </PageWrapper>
           }
         />
         <Route
           path="*"
           element={
-            <motion.div
-              variants={pageVariants}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              transition={{ duration: 0.4, ease: "easeInOut" }}
-            >
+            <PageWrapper>
               <NotFound />
-            </motion.div>
+            </PageWrapper>
           }
         />
       </Routes>
     </AnimatePresence>
   );
 };
+
+// Reusable animation wrapper
+const PageWrapper = ({ children }: { children: React.ReactNode }) => (
+  <motion.div
+    variants={pageVariants}
+    initial="initial"
+    animate="animate"
+    exit="exit"
+    transition={{ duration: 0.4, ease: "easeInOut" }}
+  >
+    {children}
+  </motion.div>
+);
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
