@@ -2,9 +2,10 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 
-import authRoutes from "./auth/JWT/authRouter";
+import authRoutes from "./middleware/auth/JWT/authRouter";
 import userRoutes from "./user/userRouter";
-import { authenticateJWT } from "./auth/JWT/authMiddleware";
+import problemRouter from "./problems/problemRouter";
+import { errorHandler } from "./middleware/errorHandler";
 
 dotenv.config();
 
@@ -21,7 +22,8 @@ app.use(express.json());
 
 app.use("/auth", authRoutes);
 app.use("/users", userRoutes);
-
+app.use("/problems", problemRouter);
+app.use(errorHandler);
 app.use((req, res) => {
   res.status(404).json({ error: "Not found" });
 });
