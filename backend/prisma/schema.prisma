@@ -41,6 +41,8 @@ model Problem {
 
   submissions Submission[]
   progress    Progress[]
+
+  TestCase TestCase[]
 }
 
 enum Difficulty {
@@ -117,4 +119,12 @@ model Progress {
   problemId  Int
 
   solvedAt   DateTime @default(now())
+}
+
+model TestCase {
+  id          Int      @id @default(autoincrement())
+  input       String
+  expected    String
+  problem     Problem  @relation(fields: [problemId], references: [id])
+  problemId   Int
 }
