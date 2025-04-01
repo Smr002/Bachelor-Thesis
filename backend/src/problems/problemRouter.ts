@@ -5,7 +5,7 @@ import { authenticateJWT } from "../middleware/auth/JWT/authMiddleware";
 
 const router = Router();
 
-//router.use(authenticateJWT);
+router.use(authenticateJWT);
 
 router.post("/execute", async (req, res) => {
   try {
