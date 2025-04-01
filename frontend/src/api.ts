@@ -53,20 +53,13 @@ export async function getUsers(token: string) {
 
 export const createProblem = async (problemData, token: string) => {
   try {
-    const { id, examples, ...data } = problemData;
-    const response = await axios.post(
-      `${API_BASE_URL}/problems`,
-      {
-        ...data,
-        examples: examples || [],
+    const { id, ...data } = problemData;
+    const response = await axios.post(`${API_BASE_URL}/problems`, data, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+    });
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
@@ -94,6 +87,24 @@ export async function findAllProblem(token: string) {
   }
 }
 
+export const getProblem = async (id: number, token: string) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/problems/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch problem"
+      );
+    }
+    throw new Error("An unexpected error occurred");
+  }
+};
+
 export const deleteProblem = async (
   id: number,
   token: string
@@ -119,20 +130,13 @@ export const updateProblem = async (
   token: string
 ): Promise<void> => {
   try {
-    const { id, examples, ...data } = problemData;
-    await axios.put(
-      `${API_BASE_URL}/problems/${id}`,
-      {
-        ...data,
-        examples: examples || [],
+    const { id, ...data } = problemData;
+    await axios.put(`${API_BASE_URL}/problems/${id}`, data, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+    });
   } catch (error) {
     if (axios.isAxiosError(error)) {
       throw new Error(
