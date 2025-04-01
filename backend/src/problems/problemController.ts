@@ -25,11 +25,21 @@ export class ProblemController {
 
   async create(req: Request, res: Response) {
     try {
-      const newProblem = await problemService.createProblem(req.body);
+      const userId = req.user?.id;
+
+      if (!userId) {
+        return res.status(401).json({ error: "User not authenticated" });
+      }
+
+      const newProblem = await problemService.createProblem({
+        ...req.body,
+        createdById: userId,
+      });
+
       res.status(201).json(newProblem);
-    } catch (err) {
-      console.log(err);
-      res.status(400).json({ error: "Failed to create problem." });
+    } catch (error) {
+      console.error("Error creating problem:", error);
+      res.status(500).json({ error: "Failed to create a new problem" });
     }
   }
 

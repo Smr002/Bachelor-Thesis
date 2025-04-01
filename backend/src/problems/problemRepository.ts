@@ -6,7 +6,7 @@ export class ProblemRepository {
   async findAll(): Promise<(Problem & { Example: Example[] })[]> {
     return prisma.problem.findMany({
       where: {
-        isDeleted: false, // Only return non-deleted problems
+        isDeleted: false,
       },
       include: {
         Example: true,
@@ -20,7 +20,7 @@ export class ProblemRepository {
     return prisma.problem.findFirst({
       where: {
         id,
-        isDeleted: false, // Only return if not deleted
+        isDeleted: false,
       },
       include: {
         Example: true,

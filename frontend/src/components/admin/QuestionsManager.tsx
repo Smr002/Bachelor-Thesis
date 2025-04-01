@@ -71,6 +71,9 @@ export const QuestionsManager = () => {
   }, [userToken]);
 
   const handleAddQuestion = () => {
+    // Get the user ID from localStorage or JWT decode
+    const userId = JSON.parse(atob(userToken!.split(".")[1])).userId;
+
     setCurrentQuestion({
       title: "",
       difficulty: "easy",
@@ -79,6 +82,7 @@ export const QuestionsManager = () => {
       constraints: [],
       completed: false,
       starterCode: "// Write your code here",
+      createdById: userId, // Add the user ID here
     } as Problem);
     setIsAddDialogOpen(true);
   };
@@ -125,7 +129,13 @@ export const QuestionsManager = () => {
             "The question has been successfully saved to the server.",
         });
       } else {
-        await updateProblem(currentQuestion, userToken);
+        if (!currentQuestion.id) {
+          throw new Error("Current question must have a valid ID to update.");
+        }
+        await updateProblem(
+          { ...currentQuestion, id: currentQuestion.id! },
+          userToken
+        );
         setQuestionList((prev) =>
           prev.map((q) => (q.id === currentQuestion.id ? currentQuestion : q))
         );
@@ -328,7 +338,7 @@ export const QuestionsManager = () => {
                 onChange={(e) =>
                   setCurrentQuestion({
                     ...currentQuestion,
-                    difficulty: e.target.value,
+                    difficulty: e.target.value as "easy" | "medium" | "hard",
                   })
                 }
                 className="col-span-3 bg-leetcode-bg-dark border border-leetcode-bg-light rounded-md h-10 px-3 text-leetcode-text-primary"
@@ -638,7 +648,7 @@ export const QuestionsManager = () => {
                 onChange={(e) =>
                   setCurrentQuestion({
                     ...currentQuestion,
-                    difficulty: e.target.value,
+                    difficulty: e.target.value as "easy" | "medium" | "hard",
                   })
                 }
                 className="col-span-3 bg-leetcode-bg-dark border border-leetcode-bg-light rounded-md h-10 px-3 text-leetcode-text-primary"

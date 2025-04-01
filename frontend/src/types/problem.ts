@@ -1,12 +1,18 @@
 export interface Problem {
-  id: number;
+  id?: number;
   title: string;
-  difficulty: string;
   description: string;
-  examples: { input: string; output: string; explanation: string }[];
-  constraints: string[];
-  completed: boolean;
+  difficulty: "easy" | "medium" | "hard";
   starterCode: string;
+  constraints: string[];
+  completed?: boolean;
+  createdById?: number;
+  examples: {
+    id?: number;
+    input: string;
+    output: string;
+    explanation?: string;
+  }[];
 }
 
 export interface ProblemRequest {
