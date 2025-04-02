@@ -1,5 +1,6 @@
 import axios from "axios";
 import { CreateUserDto, LoginDto, AuthResponse } from "@/types/user";
+import { ExecutionResponse } from "./types/execution";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -142,6 +143,57 @@ export const updateProblem = async (
       throw new Error(
         error.response?.data?.message || "Failed to update problem"
       );
+    }
+    throw new Error("An unexpected error occurred");
+  }
+};
+
+export const findProblemById = async (id: string, token: string) => {
+  const response = await fetch(`${API_BASE_URL}/problems/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch problem");
+  }
+
+  return response.json();
+};
+
+export interface RunResponse {
+  success: boolean;
+  message?: string;
+  testResults?: {
+    input: string;
+    expected: string;
+    output: string;
+    passed: boolean;
+  }[];
+  error?: string;
+}
+
+export const runCode = async (
+  problemId: string,
+  code: string,
+  token: string
+): Promise<RunResponse> => {
+  try {
+    const response = await axios.post(
+      `${API_BASE_URL}/problems/execute`,
+      { problemId, code },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      throw new Error(error.response?.data?.message || "Failed to run code");
     }
     throw new Error("An unexpected error occurred");
   }

@@ -14,9 +14,14 @@ export const executeCode = async (
   }
 
   try {
-    const results = await codeService.execute(userId, problemId, code);
+    // Convert problemId to number before passing to service
+    const results = await codeService.execute(userId, Number(problemId), code);
     res.json(results);
   } catch (error) {
-    res.status(500).json({ error: "Error 500" });
+    console.error("Error executing code:", error);
+    res.status(500).json({
+      error: "Internal server error",
+      message: error instanceof Error ? error.message : "Unknown error",
+    });
   }
 };

@@ -1,43 +1,44 @@
-import Docker from "dockerode";
+import { exec } from "child_process";
+import { promisify } from "util";
 
-const docker = new Docker();
-const TIMEOUT = 10000;
-
-export async function executeInDocker(
+export const executeInDocker = async (
   code: string,
-  input: string
-): Promise<string> {
-  const base64Code = Buffer.from(code).toString("base64");
+  input: string,
+  methodName: string = "nums"
+): Promise<string> => {
+  const execAsync = promisify(exec);
 
-  const container = await docker.createContainer({
-    Image: "my-java-runner-image",
-    Env: [`CODE=${base64Code}`, `INPUT=${input}`],
-    HostConfig: {
-      AutoRemove: true,
-    },
-  });
+  // Convert code to base64
+  const codeBase64 = Buffer.from(code).toString("base64");
 
-  const stream = await container.attach({
-    stream: true,
-    stdout: true,
-    stderr: true,
-  });
+  // Ensure input is properly formatted
+  const cleanInput = input.trim();
 
-  await container.start();
+  // Create Docker command with environment variables
+  const dockerCommand = `docker run --rm \
+    -e CODE="${codeBase64}" \
+    -e METHOD="${methodName}" \
+    -e INPUT='${cleanInput}' \
+    my-java-runner-image`;
 
-  const timeout = setTimeout(async () => {
-    try {
-      await container.stop();
-    } catch (_) {}
-  }, TIMEOUT);
+  try {
+    console.log("Executing Docker command with input:", cleanInput);
 
-  let output = "";
+    const { stdout, stderr } = await execAsync(dockerCommand);
 
-  for await (const chunk of stream as AsyncIterable<Buffer>) {
-    output += chunk.toString();
+    if (stderr) {
+      console.error("Docker stderr:", stderr);
+      return stderr;
+    }
+    return stdout;
+  } catch (error) {
+    console.error("Docker execution error:", error);
+    if (error instanceof Error) {
+      const execError = error as any;
+      if (execError.stderr) {
+        return execError.stderr;
+      }
+    }
+    throw error;
   }
-
-  clearTimeout(timeout);
-
-  return output.trim();
-}
+};

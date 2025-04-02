@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React from "react";
 
 interface Example {
   input: string;
@@ -9,9 +8,9 @@ interface Example {
 
 interface ProblemDescriptionProps {
   title: string;
-  difficulty: 'Easy' | 'Medium' | 'Hard';
+  difficulty: "easy" | "medium" | "hard"; // Note: lowercase difficulty
   description: string;
-  examples: Example[];
+  examples: any[];
   constraints: string[];
 }
 
@@ -22,24 +21,38 @@ const ProblemDescription: React.FC<ProblemDescriptionProps> = ({
   examples,
   constraints,
 }) => {
+  const getDifficultyColor = (diff: string) => {
+    switch (diff.toLowerCase()) {
+      case "easy":
+        return "bg-leetcode-green/20 text-leetcode-green";
+      case "medium":
+        return "bg-leetcode-yellow/20 text-leetcode-yellow";
+      case "hard":
+        return "bg-leetcode-red/20 text-leetcode-red";
+      default:
+        return "bg-leetcode-blue/20 text-leetcode-blue";
+    }
+  };
+
   return (
     <div className="p-6 overflow-y-auto problem-description">
-      <h1 className="text-2xl font-bold mb-2">{title}</h1>
-      
-      <div 
-        className={`inline-block mb-4 px-2 py-1 rounded text-xs font-medium ${
-          difficulty === 'Easy' ? 'bg-leetcode-green/20 text-leetcode-green' :
-          difficulty === 'Medium' ? 'bg-leetcode-yellow/20 text-leetcode-yellow' :
-          'bg-leetcode-red/20 text-leetcode-red'
-        }`}
-      >
-        {difficulty}
+      <div className="flex items-center justify-between mb-4">
+        <h1 className="text-2xl font-bold text-leetcode-text-primary">
+          {title}
+        </h1>
+        <span
+          className={`px-3 py-1 rounded-full text-sm ${getDifficultyColor(
+            difficulty
+          )}`}
+        >
+          {difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}
+        </span>
       </div>
-      
+
       <div className="mb-6">
         <p className="whitespace-pre-line">{description}</p>
       </div>
-      
+
       <div className="mb-6">
         <h2 className="text-lg font-semibold mb-2">Examples:</h2>
         {examples.map((example, index) => (
@@ -52,13 +65,14 @@ const ProblemDescription: React.FC<ProblemDescriptionProps> = ({
             </div>
             {example.explanation && (
               <div>
-                <span className="font-medium">Explanation:</span> {example.explanation}
+                <span className="font-medium">Explanation:</span>{" "}
+                {example.explanation}
               </div>
             )}
           </div>
         ))}
       </div>
-      
+
       <div>
         <h2 className="text-lg font-semibold mb-2">Constraints:</h2>
         <ul className="list-disc pl-5">

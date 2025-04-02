@@ -19,7 +19,7 @@ export class ProblemRepository {
   ): Promise<(Problem & { Example: Example[] }) | null> {
     return prisma.problem.findFirst({
       where: {
-        id,
+        id: Number(id),
         isDeleted: false,
       },
       include: {
