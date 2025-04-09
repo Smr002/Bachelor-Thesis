@@ -2,7 +2,7 @@ import { PrismaClient, Submission } from "@prisma/client";
 import { SubmissionResult } from "../types/submission";
 const prisma = new PrismaClient();
 
-export const submissionRepository = {
+export const SubmissionRepository = {
   async create(data: {
     userId: number;
     problemId: number;
@@ -77,3 +77,5 @@ export const submissionRepository = {
     });
   },
 };
+
+export const submissionRepository = SubmissionRepository;

@@ -1,6 +1,6 @@
 import { problemRepository } from "../problems/problemRepository";
 import { executeInDocker } from "../utils/dockerExecutor";
-import { submissionRepository } from "../problems/submissionRepository";
+import { submissionRepository } from "../submission/submissionRepository";
 
 // Helper function to normalize JSON strings
 const normalizeJsonString = (str: string): string => {
