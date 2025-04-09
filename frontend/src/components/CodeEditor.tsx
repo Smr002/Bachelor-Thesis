@@ -1,8 +1,8 @@
-
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Check, Play } from 'lucide-react';
-import { toast } from '@/components/ui/use-toast';
+import React, { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Check, Play } from "lucide-react";
+import { toast } from "@/components/ui/use-toast";
+import CodeRunner from "./CodeRunner";
 
 interface CodeEditorProps {
   initialCode: string;
@@ -11,37 +11,34 @@ interface CodeEditorProps {
   onSubmit: (code: string) => Promise<boolean>;
 }
 
-const CodeEditor: React.FC<CodeEditorProps> = ({ 
-  initialCode, 
-  language, 
-  onRun, 
-  onSubmit 
+const CodeEditor: React.FC<CodeEditorProps> = ({
+  initialCode,
+  language,
+  onRun,
+  onSubmit,
 }) => {
   const [code, setCode] = useState(initialCode);
-  const [output, setOutput] = useState('');
   const [isRunning, setIsRunning] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [triggerRun, setTriggerRun] = useState(false);
 
-  const handleRun = async () => {
-    setIsRunning(true);
-    setOutput('Running...');
-    
-    try {
-      const result = await onRun(code);
-      setOutput(JSON.stringify(result, null, 2));
-    } catch (error) {
-      setOutput(`Error: ${error}`);
-    } finally {
-      setIsRunning(false);
+  const handleRun = () => {
+    if (!isRunning) {
+      setIsRunning(true);
+      setTriggerRun(true); // Trigger CodeRunner to run the code
     }
+  };
+
+  const handleRunComplete = () => {
+    setIsRunning(false); // Reset isRunning when execution completes
   };
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
-    
+
     try {
       const success = await onSubmit(code);
-      
+
       if (success) {
         toast({
           title: "Success!",
@@ -71,9 +68,9 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
       <div className="flex items-center justify-between p-2 bg-leetcode-bg-medium border-b border-leetcode-bg-light">
         <span className="text-sm font-medium">{language}</span>
         <div className="flex gap-2">
-          <Button 
-            size="sm" 
-            variant="outline" 
+          <Button
+            size="sm"
+            variant="outline"
             onClick={handleRun}
             disabled={isRunning}
             className="bg-leetcode-bg-light text-leetcode-text-primary border-leetcode-bg-light"
@@ -81,8 +78,8 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
             <Play className="h-4 w-4 mr-1" />
             Run
           </Button>
-          <Button 
-            size="sm" 
+          <Button
+            size="sm"
             onClick={handleSubmit}
             disabled={isSubmitting}
             className="bg-leetcode-green hover:bg-leetcode-green/90 text-white"
@@ -92,7 +89,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
           </Button>
         </div>
       </div>
-      
+
       <div className="flex-grow overflow-hidden">
         <textarea
           value={code}
@@ -101,15 +98,17 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
           spellCheck={false}
         />
       </div>
-      
-      {output && (
-        <div className="p-4 bg-leetcode-bg-medium border-t border-leetcode-bg-light">
-          <h3 className="text-sm font-medium mb-2">Output:</h3>
-          <pre className="bg-leetcode-bg-dark p-3 rounded text-sm overflow-x-auto">
-            {output}
-          </pre>
-        </div>
-      )}
+
+      <div className="p-4 bg-leetcode-bg-medium border-t border-leetcode-bg-light">
+        <CodeRunner
+          onRun={onRun}
+          code={code}
+          isRunning={isRunning}
+          triggerRun={triggerRun}
+          setTriggerRun={setTriggerRun}
+          onRunComplete={handleRunComplete}
+        />
+      </div>
     </div>
   );
 };
