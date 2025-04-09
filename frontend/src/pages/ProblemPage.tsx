@@ -8,7 +8,12 @@ import CodeEditor from "@/components/CodeEditor";
 import Comments from "@/components/Comments";
 import { Button } from "@/components/ui/button";
 import { Problem } from "@/types/problem";
-import { findAllProblem, findProblemById, runCode } from "@/api";
+import {
+  findAllProblem,
+  findProblemById,
+  runCode,
+  createSubmission,
+} from "@/api";
 import { toast } from "sonner";
 
 const ProblemPage = () => {
@@ -32,7 +37,7 @@ const ProblemPage = () => {
         const allProblems = await findAllProblem(userToken);
         setProblems(allProblems);
 
-        // Fetch current problem
+        // Fetch current problem details
         const data = await findProblemById(problemId, userToken);
         setProblem({
           ...data,
@@ -77,44 +82,44 @@ const ProblemPage = () => {
   const prevProblem = [...problems].reverse().find((p) => p.id < problem.id);
 
   const handleRunCode = async (code: string) => {
-    if (!userToken || !problemId)
+    if (!userToken || !problemId) {
+      toast.error("Authentication required");
       return { success: false, error: "Not authenticated" };
+    }
 
     try {
       const response = await runCode(problemId, code, userToken);
       console.log("API Response:", response);
 
-      // Handle successful code execution
-      if (response) {
-        if (response.testResults && response.testResults.length > 0) {
-          const passedTests = response.testResults.filter(
-            (test) => test.passed
-          ).length;
-          const totalTests = response.testResults.length;
-
-          toast.success("Code execution completed", {
-            description: `${passedTests}/${totalTests} test cases passed`,
-          });
-        } else {
-          toast.success("Code execution completed", {
-            description: response.message || "All tests passed",
-          });
-        }
-
-        return "Code executed successfully";
+      // Check if response and testResults exist
+      if (!response || !response.testResults) {
+        toast.error("Code execution completed", {
+          description: response?.message || "No test results returned",
+        });
+        return {
+          success: false,
+          message: "Execution did not return test results",
+        };
       }
 
-      // Handle failed code execution
-      const failedTest = response.testResults?.find((test) => !test.passed);
-      const errorMessage = failedTest
-        ? `Test failed:\nInput: ${failedTest.input}\nExpected: ${failedTest.expected}\nGot: ${failedTest.output}`
-        : response.error || response.message || "Unknown error occurred";
+      const testResults = response.testResults;
+      const allTestsPassed = testResults.every((test) => test.passed);
 
-      toast.error("Code execution failed", {
-        description: errorMessage,
-      });
+      if (allTestsPassed) {
+        toast.success("Code execution completed", {
+          description: `${testResults.length}/${testResults.length} tests passed`,
+        });
+        return { success: true, message: "Code executed successfully" };
+      } else {
+        const passedTests = testResults.filter((test) => test.passed).length;
+        const failedTests = testResults.filter((test) => !test.passed);
+        const firstErrorMessage = failedTests[0]?.output || "Some tests failed";
 
-      return response;
+        toast.error("Code execution completed", {
+          description: `${passedTests}/${testResults.length} test cases passed. Error: ${firstErrorMessage}`,
+        });
+        return { success: false, message: "Some tests failed" };
+      }
     } catch (error: any) {
       console.error("Code execution error:", error);
       const errorMessage = error?.message || "Unknown error occurred";
@@ -131,25 +136,60 @@ const ProblemPage = () => {
     }
   };
 
-  const handleSubmitCode = async (code: string) => {
-    return new Promise<boolean>((resolve) => {
-      setTimeout(() => {
-        try {
-          // eslint-disable-next-line no-new-func
-          new Function(`
-            "use strict";
-            ${code}
-            
-            // Test against all examples
-            ${getProblemTestCode(problem)}
-          `)();
+  const handleSubmitCode = async (code: string): Promise<boolean> => {
+    if (!userToken || !problemId) {
+      toast.error("Authentication required");
+      return false;
+    }
 
-          resolve(true);
-        } catch (error) {
-          resolve(false);
-        }
-      }, 1500);
-    });
+    try {
+      // Run the code to test it
+      const testResponse = await runCode(problemId!, code, userToken);
+      console.log("Test response:", testResponse);
+
+      if (!testResponse || !testResponse.testResults) {
+        toast.error("Code execution failed", {
+          description: testResponse?.message || "Unexpected result",
+        });
+        return false;
+      }
+
+      const testResults = testResponse.testResults;
+      const isCorrect = testResults.every((test) => test.passed);
+
+      // Prepare submission data
+      const submissionData = {
+        userId: parseInt(localStorage.getItem("userId") || "0"), // Assuming userId is stored in localStorage
+        problemId: parseInt(problemId),
+        code,
+        results: testResults,
+        isCorrect,
+      };
+
+      // Submit the code to the backend
+      await createSubmission(submissionData, userToken);
+
+      if (isCorrect) {
+        toast.success("Submission successful", {
+          description: "All test cases passed!",
+        });
+      } else {
+        const passedTests = testResults.filter((test) => test.passed).length;
+        toast.error("Submission failed", {
+          description: `${passedTests}/${testResults.length} test cases passed`,
+        });
+      }
+
+      return isCorrect;
+    } catch (error: any) {
+      console.error("Submission error:", error);
+      const errorMessage = error?.message || "Unknown error occurred";
+
+      toast.error("Error submitting code", {
+        description: errorMessage,
+      });
+      return false;
+    }
   };
 
   const toggleComments = () => {
@@ -259,33 +299,6 @@ const ProblemPage = () => {
       </div>
     </div>
   );
-};
-
-const getProblemTestCode = (problem: any) => {
-  if (problem.id === 1) {
-    return `
-      const result = twoSum([2,7,11,15], 9);
-      if (!Array.isArray(result) || result.length !== 2 || 
-          (result[0] !== 0 || result[1] !== 1) && (result[0] !== 1 || result[1] !== 0)) {
-        throw new Error("Test case failed");
-      }
-      return "Test passed!";
-    `;
-  } else if (problem.id === 2) {
-    return `
-      const result1 = isValid("()");
-      const result2 = isValid("()[]{}");
-      const result3 = isValid("(]");
-      
-      if (result1 !== true || result2 !== true || result3 !== false) {
-        throw new Error("Test case failed");
-      }
-      
-      return "Test passed!";
-    `;
-  } else {
-    return `return "Test executed (no validation implemented for this problem)";`;
-  }
 };
 
 export default ProblemPage;
