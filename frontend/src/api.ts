@@ -1,6 +1,7 @@
 import axios from "axios";
 import { CreateUserDto, LoginDto, AuthResponse } from "@/types/user";
 import { ExecutionResponse } from "./types/execution";
+import { Submission, SubmissionResult } from "./types/submission";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -190,10 +191,142 @@ export const runCode = async (
         },
       }
     );
-    return response.data;
+
+    return {
+      success: true,
+      testResults: response.data,
+    };
   } catch (error) {
     if (axios.isAxiosError(error)) {
       throw new Error(error.response?.data?.message || "Failed to run code");
+    }
+    throw new Error("An unexpected error occurred");
+  }
+};
+
+export const createSubmission = async (
+  submissionData: {
+    userId: number;
+    problemId: number;
+    code: string;
+    results: SubmissionResult[];
+    isCorrect: boolean;
+  },
+  token: string
+): Promise<Submission> => {
+  try {
+    const response = await axios.post(
+      `${API_BASE_URL}/submission`,
+      submissionData,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      throw new Error(
+        error.response?.data?.message || "Failed to create submission"
+      );
+    }
+    throw new Error("An unexpected error occurred");
+  }
+};
+
+export const getSubmissionById = async (
+  id: number,
+  token: string
+): Promise<Submission> => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/submissions/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch submission"
+      );
+    }
+    throw new Error("An unexpected error occurred");
+  }
+};
+
+export const getSubmissionsByUserAndProblem = async (
+  userId: number,
+  problemId: number,
+  limit: number = 20,
+  token: string
+): Promise<Submission[]> => {
+  try {
+    const response = await axios.get(
+      `${API_BASE_URL}/submissions/user/${userId}/problem/${problemId}?limit=${limit}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch submissions"
+      );
+    }
+    throw new Error("An unexpected error occurred");
+  }
+};
+
+export const countSubmissionsForProblem = async (
+  problemId: number,
+  token: string
+): Promise<number> => {
+  try {
+    const response = await axios.get(
+      `${API_BASE_URL}/submissions/count/${problemId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data.count;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      throw new Error(
+        error.response?.data?.message || "Failed to count submissions"
+      );
+    }
+    throw new Error("An unexpected error occurred");
+  }
+};
+
+export const getRecentSubmissions = async (
+  days: number = 7,
+  limit: number = 50,
+  token: string
+): Promise<Submission[]> => {
+  try {
+    const response = await axios.get(
+      `${API_BASE_URL}/submissions/recent?days=${days}&limit=${limit}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch recent submissions"
+      );
     }
     throw new Error("An unexpected error occurred");
   }

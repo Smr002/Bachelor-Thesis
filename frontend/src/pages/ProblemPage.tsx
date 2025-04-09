@@ -89,9 +89,7 @@ const ProblemPage = () => {
 
     try {
       const response = await runCode(problemId, code, userToken);
-      console.log("API Response:", response);
 
-      // Check if response and testResults exist
       if (!response || !response.testResults) {
         toast.error("Code execution completed", {
           description: response?.message || "No test results returned",
@@ -143,9 +141,7 @@ const ProblemPage = () => {
     }
 
     try {
-      // Run the code to test it
       const testResponse = await runCode(problemId!, code, userToken);
-      console.log("Test response:", testResponse);
 
       if (!testResponse || !testResponse.testResults) {
         toast.error("Code execution failed", {
@@ -157,16 +153,14 @@ const ProblemPage = () => {
       const testResults = testResponse.testResults;
       const isCorrect = testResults.every((test) => test.passed);
 
-      // Prepare submission data
       const submissionData = {
-        userId: parseInt(localStorage.getItem("userId") || "0"), // Assuming userId is stored in localStorage
+        userId: parseInt(localStorage.getItem("userId") || "0"),
         problemId: parseInt(problemId),
         code,
         results: testResults,
         isCorrect,
       };
 
-      // Submit the code to the backend
       await createSubmission(submissionData, userToken);
 
       if (isCorrect) {
