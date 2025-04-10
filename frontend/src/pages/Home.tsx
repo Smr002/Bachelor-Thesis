@@ -1,17 +1,31 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Code, List, Timer, Trophy } from "lucide-react";
+import { Code, List, Timer, Trophy, FileCode } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
 import Footer from "./Footer";
+import { getSubmissionsByUser, getProblem } from "@/api";
+import { Submission } from "@/types/submission";
+import { jwtDecode } from "jwt-decode";
+
+interface JwtPayload {
+  sub?: string | number;
+  id?: string | number;
+  [key: string]: any;
+}
+
+interface EnhancedSubmission extends Submission {
+  problemName?: string;
+}
 
 const FeatureCard: React.FC<{
   icon: React.ReactNode;
   bgColorClass: string;
   title: string;
   description: string;
-}> = ({ icon, bgColorClass, title, description }) => {
+  submissions?: EnhancedSubmission[];
+}> = ({ icon, bgColorClass, title, description, submissions }) => {
   return (
     <motion.div
       variants={{
@@ -25,7 +39,43 @@ const FeatureCard: React.FC<{
         <div className={`${bgColorClass} p-3 rounded-lg`}>{icon}</div>
         <h2 className="ml-3 text-xl font-semibold">{title}</h2>
       </div>
-      <p className="text-leetcode-text-secondary">{description}</p>
+      {submissions ? (
+        <div className="text-leetcode-text-secondary">
+          <ul className="space-y-2">
+            {submissions.length > 0 ? (
+              submissions.map((submission) => (
+                <li
+                  key={submission.id}
+                  className="flex items-center justify-between text-sm"
+                >
+                  <div className="flex items-center">
+                    <span
+                      className={`mr-2 h-2 w-2 rounded-full ${
+                        submission.isCorrect
+                          ? "bg-leetcode-green"
+                          : "bg-leetcode-red"
+                      }`}
+                    ></span>
+                    <Link
+                      to={`/problem/${submission.problemId}`}
+                      className="hover:underline"
+                    >
+                      {submission.problemName || "Unknown Problem"}
+                    </Link>
+                  </div>
+                  <span className="text-xs text-gray-400">
+                    {new Date(submission.createdAt).toLocaleDateString()}
+                  </span>
+                </li>
+              ))
+            ) : (
+              <p>No recent submissions found.</p>
+            )}
+          </ul>
+        </div>
+      ) : (
+        <p className="text-leetcode-text-secondary">{description}</p>
+      )}
     </motion.div>
   );
 };
@@ -75,11 +125,47 @@ const CTASection: React.FC = () => {
 };
 
 const Index = () => {
+  const navigate = useNavigate();
   const [isLoaded, setIsLoaded] = useState(false);
+  const [submissions, setSubmissions] = useState<EnhancedSubmission[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    setIsLoaded(true);
-  }, []);
+    const fetchSubmissions = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          setError("Please log in to view your recent submissions.");
+          navigate("/login");
+          return;
+        }
+        const decoded: JwtPayload = jwtDecode(token);
+        const userId = decoded.sub || decoded.id;
+        if (!userId) {
+          setError("Invalid token. Please log in again.");
+          navigate("/login");
+          return;
+        }
+        const data = await getSubmissionsByUser(Number(userId), 5, token);
+        const enhancedSubmissions = await Promise.all(
+          data.map(async (submission: EnhancedSubmission) => {
+            try {
+              const problem = await getProblem(submission.problemId, token);
+              return { ...submission, problemName: problem.title };
+            } catch (err) {
+              return { ...submission, problemName: "Unknown Problem" };
+            }
+          })
+        );
+        setSubmissions(enhancedSubmissions);
+      } catch (err: any) {
+        setError(err.message || "Failed to fetch submissions.");
+      } finally {
+        setIsLoaded(true);
+      }
+    };
+    fetchSubmissions();
+  }, [navigate]);
 
   const containerVariants = {
     hidden: {},
@@ -93,7 +179,6 @@ const Index = () => {
   return (
     <div className="min-h-screen flex flex-col bg-leetcode-bg-dark">
       <Navbar />
-
       <main className="flex-grow">
         <div className="max-w-6xl mx-auto px-4 py-12">
           <motion.div
@@ -120,13 +205,11 @@ const Index = () => {
               </Link>
             </div>
           </motion.div>
-
-          {/* Feature Cards Section */}
           <motion.div
             variants={containerVariants}
             initial="hidden"
             animate={isLoaded ? "visible" : "hidden"}
-            className="grid md:grid-cols-3 gap-8 mb-16"
+            className="grid md:grid-cols-4 gap-8 mb-16"
           >
             <FeatureCard
               icon={<Code className="h-6 w-6 text-leetcode-green" />}
@@ -134,26 +217,32 @@ const Index = () => {
               title="Curated Problems"
               description="Practice with a collection of carefully selected algorithm problems ranging from easy to hard."
             />
-
             <FeatureCard
               icon={<Timer className="h-6 w-6 text-leetcode-yellow" />}
               bgColorClass="bg-leetcode-yellow/20"
               title="Real-time Testing"
               description="Test your solutions instantly and get immediate feedback on your code performance."
             />
-
             <FeatureCard
               icon={<Trophy className="h-6 w-6 text-leetcode-red" />}
               bgColorClass="bg-leetcode-red/20"
               title="Track Progress"
               description="Monitor your coding journey as you solve more problems and improve your skills."
             />
+            <FeatureCard
+              icon={<FileCode className="h-6 w-6 text-leetcode-blue" />}
+              bgColorClass="bg-leetcode-blue/20"
+              title="Recent Submissions"
+              description={
+                error ||
+                "View your recent submissions and track your coding history."
+              }
+              submissions={submissions}
+            />
           </motion.div>
-
           <CTASection />
         </div>
       </main>
-
       <Footer />
     </div>
   );

@@ -283,6 +283,31 @@ export const getSubmissionsByUserAndProblem = async (
   }
 };
 
+export const getSubmissionsByUser = async (
+  userId: number,
+  limit: number = 25,
+  token: string
+): Promise<Submission[]> => {
+  try {
+    const response = await axios.get(
+      `${API_BASE_URL}/submission/user/${userId}?limit=${limit}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch submissions"
+      );
+    }
+    throw new Error("An unexpected error occurred");
+  }
+};
+
 export const countSubmissionsForProblem = async (
   problemId: number,
   token: string

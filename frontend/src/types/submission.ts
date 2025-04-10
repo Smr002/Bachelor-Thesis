@@ -13,4 +13,5 @@ export interface Submission {
   results: SubmissionResult[];
   isCorrect: boolean;
   createdAt: string;
+  problemName?: string;
 }
