@@ -3,6 +3,12 @@ import { SubmissionResult } from "../types/submission";
 
 const prisma = new PrismaClient();
 
+const DIFFICULTY_WEIGHTS: Record<string, number> = {
+  easy: 1,
+  medium: 2,
+  hard: 3,
+};
+
 export const SubmissionRepository = {
   async create(data: {
     userId: number;
@@ -90,9 +96,14 @@ export const SubmissionRepository = {
     });
   },
 
-  async getLeaderboard(
-    limit: number = 10
-  ): Promise<{ userId: number; username: string; problemsSolved: number }[]> {
+  async getLeaderboard(limit: number = 10): Promise<
+    {
+      userId: number;
+      username: string;
+      problemsSolved: number;
+      score: number;
+    }[]
+  > {
     const leaderboardData = await prisma.submission.groupBy({
       by: ["userId"],
       where: {
@@ -129,18 +140,31 @@ export const SubmissionRepository = {
           },
         });
 
+        let weightedScore = 0;
+        for (const prob of uniqueProblems) {
+          const problem = await prisma.problem.findUnique({
+            where: { id: prob.problemId },
+            select: { difficulty: true },
+          });
+          if (problem && problem.difficulty) {
+            const diff = problem.difficulty.toLowerCase();
+            weightedScore += DIFFICULTY_WEIGHTS[diff] || 0;
+          }
+        }
+
         return {
           userId: entry.userId,
           problemsSolved: uniqueProblems.length,
           earliestSubmission: earliestSubmission?.createdAt || new Date(),
+          score: weightedScore,
         };
       })
     );
 
     const sortedLeaderboard = leaderboardWithDetails
       .sort((a, b) => {
-        if (b.problemsSolved !== a.problemsSolved) {
-          return b.problemsSolved - a.problemsSolved;
+        if (b.score !== a.score) {
+          return b.score - a.score;
         }
         return a.earliestSubmission.getTime() - b.earliestSubmission.getTime();
       })
@@ -156,6 +180,7 @@ export const SubmissionRepository = {
           userId: entry.userId,
           username: user?.name || `User ${entry.userId}`,
           problemsSolved: entry.problemsSolved,
+          score: entry.score,
         };
       })
     );
