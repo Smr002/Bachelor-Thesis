@@ -49,7 +49,6 @@ export class SubmissionService {
 
   async getSubmissionsByUser(
     userId: number,
-
     limit: number = 20
   ): Promise<Submission[]> {
     try {
@@ -81,6 +80,17 @@ export class SubmissionService {
     } catch (error) {
       console.error("Error fetching recent submissions:", error);
       throw new Error("Failed to fetch recent submissions");
+    }
+  }
+
+  async getLeaderboard(
+    limit: number = 10
+  ): Promise<{ userId: number; username: string; problemsSolved: number }[]> {
+    try {
+      return await submissionRepository.getLeaderboard(limit);
+    } catch (error) {
+      console.error("Error fetching leaderboard:", error);
+      throw new Error("Failed to fetch leaderboard");
     }
   }
 }

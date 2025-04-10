@@ -128,6 +128,22 @@ export class SubmissionController {
       res.status(500).json({ error: "Failed to fetch recent submissions" });
     }
   }
+
+  async getLeaderboard(req: Request, res: Response) {
+    try {
+      const limit = req.params.limit ? Number(req.params.limit) : 10;
+
+      if (isNaN(limit)) {
+        return res.status(400).json({ error: "Invalid limit parameter" });
+      }
+
+      const leaderboard = await submissionService.getLeaderboard(limit);
+      res.json(leaderboard);
+    } catch (error) {
+      console.error("Error fetching leaderboard:", error);
+      res.status(500).json({ error: "Failed to fetch leaderboard" });
+    }
+  }
 }
 
 export const submissionController = new SubmissionController();

@@ -4,8 +4,10 @@ import { Code, List, Trophy, Search, Menu, LogIn, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { jwtDecode } from "jwt-decode";
+
 interface DecodedToken {
   exp: number;
+  role?: string; // Add role to the decoded token interface
   [key: string]: any;
 }
 
@@ -14,6 +16,7 @@ const Navbar = () => {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+  const [navLink, setNavLink] = useState("/"); // State for the logo link
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -21,11 +24,38 @@ const Navbar = () => {
 
   const isActive = (path: string) => location.pathname === path;
 
+  // Handle scroll effect for navbar background
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 10);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Check token and role to set the logo link
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    if (token) {
+      try {
+        const decoded: DecodedToken = jwtDecode(token);
+        const userRole = decoded.role;
+
+        console.log("Decoded user role:", userRole);
+
+        if (userRole === "student") {
+          setNavLink("/home");
+        } else {
+          setNavLink("/");
+        }
+      } catch (err) {
+        console.error("Error decoding token:", err);
+        setNavLink("/"); // Fallback to "/" if token is invalid
+      }
+    } else {
+      console.log("No token found, defaulting to /");
+      setNavLink("/"); // No token, default to "/"
+    }
+  }, []); // Run once on mount
 
   const handleLogout = () => {
     const token = localStorage.getItem("token");
@@ -47,6 +77,7 @@ const Navbar = () => {
 
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    setNavLink("/"); // Update logo link after logout
     navigate("/");
   };
 
@@ -61,7 +92,7 @@ const Navbar = () => {
         <div className="flex items-center gap-2">
           <Code className="h-6 w-6 text-leetcode-blue animate-pulse" />
           <Link
-            to="/"
+            to={navLink} // Use dynamic navLink based on token and role
             className="text-xl font-bold transition-colors hover:text-leetcode-blue"
           >
             AlgoStruct

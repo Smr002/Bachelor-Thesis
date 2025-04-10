@@ -54,4 +54,12 @@ router.get("/recent", async (req, res) => {
   }
 });
 
+router.get("/leaderboard/:limit", async (req, res) => {
+  try {
+    await submissionController.getLeaderboard(req, res);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch leaderboard." });
+  }
+});
+
 export default router;

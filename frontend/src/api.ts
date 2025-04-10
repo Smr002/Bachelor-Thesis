@@ -241,7 +241,7 @@ export const getSubmissionById = async (
   token: string
 ): Promise<Submission> => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/submissions/${id}`, {
+    const response = await axios.get(`${API_BASE_URL}/submission/${id}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -351,6 +351,30 @@ export const getRecentSubmissions = async (
     if (axios.isAxiosError(error)) {
       throw new Error(
         error.response?.data?.message || "Failed to fetch recent submissions"
+      );
+    }
+    throw new Error("An unexpected error occurred");
+  }
+};
+
+export const getLeaderboard = async (
+  limit: number = 10,
+  token: string
+): Promise<{ userId: number; username: string; problemsSolved: number }[]> => {
+  try {
+    const response = await axios.get(
+      `${API_BASE_URL}/submission/leaderboard/${limit}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch leaderboard"
       );
     }
     throw new Error("An unexpected error occurred");

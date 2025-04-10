@@ -5,7 +5,7 @@ import { Code, List, Timer, Trophy, FileCode } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
 import Footer from "./Footer";
-import { getSubmissionsByUser, getProblem } from "@/api";
+import { getSubmissionsByUser, getProblem, getLeaderboard } from "@/api";
 import { Submission } from "@/types/submission";
 import { jwtDecode } from "jwt-decode";
 
@@ -120,6 +120,83 @@ const CTASection: React.FC = () => {
           </Button>
         </Link>
       </div>
+    </motion.div>
+  );
+};
+
+const LeaderboardSection: React.FC = () => {
+  const [leaderboard, setLeaderboard] = useState<
+    { userId: number; username: string; problemsSolved: number }[]
+  >([]);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchLeaderboard = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          setError("Please log in to view leaderboard.");
+          return;
+        }
+        const data = await getLeaderboard(3, token);
+        
+
+        setLeaderboard(data);
+      } catch (err: any) {
+        setError(err.message || "Failed to fetch leaderboard.");
+      }
+    };
+    fetchLeaderboard();
+  }, []);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      whileInView={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+      viewport={{ once: true }}
+      className="bg-leetcode-bg-medium p-8 rounded-lg mt-8"
+    >
+      <h2 className="text-2xl font-bold mb-6 text-leetcode-text-primary">
+        Top Coders Leaderboard
+      </h2>
+      {error ? (
+        <p className="text-leetcode-text-secondary">{error}</p>
+      ) : leaderboard.length > 0 ? (
+        <ul className="space-y-3">
+          {leaderboard.map((entry, index) => (
+            <li
+              key={entry.userId}
+              className="flex items-center justify-between"
+            >
+              <div className="flex items-center">
+                <span className="mr-3 text-leetcode-text-primary font-semibold">
+                  {index + 1}.
+                </span>
+                <Trophy
+                  className={`h-5 w-5 mr-2 ${
+                    index === 0
+                      ? "text-leetcode-yellow"
+                      : index === 1
+                      ? "text-leetcode-blue"
+                      : "text-leetcode-green"
+                  }`}
+                />
+                <span className="text-leetcode-text-primary">
+                  {entry.username}
+                </span>
+              </div>
+              <span className="text-leetcode-text-secondary">
+                {entry.problemsSolved} solved
+              </span>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="text-leetcode-text-secondary">
+          No leaderboard data available.
+        </p>
+      )}
     </motion.div>
   );
 };
@@ -241,6 +318,7 @@ const Index = () => {
             />
           </motion.div>
           <CTASection />
+          <LeaderboardSection />
         </div>
       </main>
       <Footer />

@@ -1,5 +1,6 @@
 import { PrismaClient, Submission } from "@prisma/client";
 import { SubmissionResult } from "../types/submission";
+
 const prisma = new PrismaClient();
 
 export const SubmissionRepository = {
@@ -87,6 +88,79 @@ export const SubmissionRepository = {
         problem: { select: { id: true, title: true } },
       },
     });
+  },
+
+  async getLeaderboard(
+    limit: number = 10
+  ): Promise<{ userId: number; username: string; problemsSolved: number }[]> {
+    const leaderboardData = await prisma.submission.groupBy({
+      by: ["userId"],
+      where: {
+        isCorrect: true,
+      },
+      _count: {
+        problemId: true,
+      },
+    });
+
+    const leaderboardWithDetails = await Promise.all(
+      leaderboardData.map(async (entry) => {
+        const uniqueProblems = await prisma.submission.findMany({
+          where: {
+            userId: entry.userId,
+            isCorrect: true,
+          },
+          distinct: ["problemId"],
+          select: {
+            problemId: true,
+          },
+        });
+
+        const earliestSubmission = await prisma.submission.findFirst({
+          where: {
+            userId: entry.userId,
+            isCorrect: true,
+          },
+          orderBy: {
+            createdAt: "asc",
+          },
+          select: {
+            createdAt: true,
+          },
+        });
+
+        return {
+          userId: entry.userId,
+          problemsSolved: uniqueProblems.length,
+          earliestSubmission: earliestSubmission?.createdAt || new Date(),
+        };
+      })
+    );
+
+    const sortedLeaderboard = leaderboardWithDetails
+      .sort((a, b) => {
+        if (b.problemsSolved !== a.problemsSolved) {
+          return b.problemsSolved - a.problemsSolved;
+        }
+        return a.earliestSubmission.getTime() - b.earliestSubmission.getTime();
+      })
+      .slice(0, limit);
+
+    const leaderboardWithUsers = await Promise.all(
+      sortedLeaderboard.map(async (entry) => {
+        const user = await prisma.user.findUnique({
+          where: { id: entry.userId },
+          select: { name: true },
+        });
+        return {
+          userId: entry.userId,
+          username: user?.name || `User ${entry.userId}`,
+          problemsSolved: entry.problemsSolved,
+        };
+      })
+    );
+
+    return leaderboardWithUsers;
   },
 };
 
