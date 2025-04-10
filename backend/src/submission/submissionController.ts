@@ -72,6 +72,26 @@ export class SubmissionController {
     }
   }
 
+  async getByUser(req: Request, res: Response) {
+    try {
+      const userId = Number(req.params.userId);
+      const limit = req.query.limit ? Number(req.query.limit) : 20;
+
+      if (isNaN(userId) || isNaN(limit)) {
+        return res.status(400).json({ error: "Invalid parameters" });
+      }
+
+      const submissions = await submissionService.getSubmissionsByUser(
+        userId,
+        limit
+      );
+      res.json(submissions);
+    } catch (error) {
+      console.error("Error fetching submissions:", error);
+      res.status(500).json({ error: "Failed to fetch submissions" });
+    }
+  }
+
   async countSubmissionsForProblem(req: Request, res: Response) {
     try {
       const problemId = Number(req.params.problemId);

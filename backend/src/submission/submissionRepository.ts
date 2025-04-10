@@ -49,6 +49,18 @@ export const SubmissionRepository = {
     });
   },
 
+  async getByUser(userId: number, limit: number = 20): Promise<Submission[]> {
+    return prisma.submission.findMany({
+      where: {
+        userId,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      take: limit,
+    });
+  },
+
   async countSubmissions(problemId: number): Promise<number> {
     return prisma.submission.count({
       where: { problemId },

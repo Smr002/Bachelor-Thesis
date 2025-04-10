@@ -30,6 +30,14 @@ router.get("/user/:userId/problem/:problemId", async (req, res) => {
   }
 });
 
+router.get("/user/:userId", async (req, res) => {
+  try {
+    await submissionController.getByUser(req, res);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch submissions." });
+  }
+});
+
 router.get("/count/:problemId", async (req, res) => {
   try {
     await submissionController.countSubmissionsForProblem(req, res);

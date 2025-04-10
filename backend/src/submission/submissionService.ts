@@ -47,6 +47,19 @@ export class SubmissionService {
     }
   }
 
+  async getSubmissionsByUser(
+    userId: number,
+
+    limit: number = 20
+  ): Promise<Submission[]> {
+    try {
+      return await submissionRepository.getByUser(userId, limit);
+    } catch (error) {
+      console.error(`Error fetching submissions for user ${userId} :`, error);
+      throw new Error("Failed to fetch submissions");
+    }
+  }
+
   async countSubmissionsForProblem(problemId: number): Promise<number> {
     try {
       return await submissionRepository.countSubmissions(problemId);

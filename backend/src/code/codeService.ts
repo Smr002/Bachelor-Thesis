@@ -85,14 +85,6 @@ export const codeService = {
       }
     }
 
-    await submissionRepository.create({
-      userId,
-      problemId,
-      code,
-      results: results,
-      isCorrect: results.every((r) => r.passed),
-    });
-
     return results;
   },
 };
