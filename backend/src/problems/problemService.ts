@@ -36,10 +36,6 @@ export class ProblemService {
     }[];
   }): Promise<Problem> {
     try {
-      if (!data.createdById) {
-        throw new Error("User ID is required to create a problem");
-      }
-
       return await this.repo.create(data);
     } catch (error) {
       console.error("Error creating a new problem:", error);

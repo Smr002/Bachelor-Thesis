@@ -7,6 +7,7 @@ import userRoutes from "./user/userRouter";
 import problemRouter from "./problems/problemRouter";
 import { errorHandler } from "./middleware/errorHandler";
 import submissionRouter from "./submission/submissionRouter";
+import commentRouter from "./comment/commentRouter";
 
 dotenv.config();
 
@@ -25,6 +26,7 @@ app.use("/auth", authRoutes);
 app.use("/users", userRoutes);
 app.use("/problems", problemRouter);
 app.use("/submission", submissionRouter);
+app.use("/comment", commentRouter);
 app.use(errorHandler);
 app.use((req, res) => {
   res.status(404).json({ error: "Not found" });

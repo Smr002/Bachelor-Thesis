@@ -2,6 +2,7 @@ import axios from "axios";
 import { CreateUserDto, LoginDto, AuthResponse } from "@/types/user";
 import { ExecutionResponse } from "./types/execution";
 import { Submission, SubmissionResult } from "./types/submission";
+import { CreateCommentDto, Comment } from "./types/comment";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -379,4 +380,66 @@ export const getLeaderboard = async (
     }
     throw new Error("An unexpected error occurred");
   }
+};
+
+export const createComment = async (
+  comment: { content: string; problemId: number; userId: number },
+  token: string
+): Promise<Comment> => {
+  return axios
+    .post(`${API_BASE_URL}/comment`, comment, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+    .then((res) => res.data);
+};
+
+export const getCommentsByProblem = async (
+  problemId: number,
+  token: string
+): Promise<Comment[]> => {
+  try {
+    const response = await axios.get(
+      `${API_BASE_URL}/comment/problem/${problemId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error: any) {
+    if (axios.isAxiosError(error)) {
+      throw new Error(
+        error.response?.data?.error || "Failed to fetch comments"
+      );
+    }
+    throw new Error("Unexpected error while fetching comments");
+  }
+};
+
+export const likeComment = async (commentId: number, token: string) => {
+  const response = await axios.post(
+    `${API_BASE_URL}/comment/like/${commentId}`,
+    {},
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  return response.data;
+};
+export const dislikeComment = async (commentId: number, token: string) => {
+  const response = await axios.post(
+    `${API_BASE_URL}/comment/dislike/${commentId}`,
+    {},
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  return response.data;
 };
