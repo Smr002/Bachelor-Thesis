@@ -443,3 +443,142 @@ export const dislikeComment = async (commentId: number, token: string) => {
   );
   return response.data;
 };
+
+export const createQuiz = async (
+  quizData: {
+    title: string;
+    createdById: number;
+    questions: {
+      questionText: string;
+      optionA: string;
+      optionB: string;
+      optionC: string;
+      optionD: string;
+      correctOption: string;
+      explanation?: string;
+    }[];
+  },
+  token: string
+) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/quiz`, quizData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+    return response.data;
+  } catch (error: any) {
+    if (axios.isAxiosError(error)) {
+      throw new Error(error.response?.data?.message || "Failed to create quiz");
+    }
+    throw new Error("An unexpected error occurred");
+  }
+};
+export const getAllQuizzes = async (token: string) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/quiz`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error: any) {
+    if (axios.isAxiosError(error)) {
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch quizzes"
+      );
+    }
+    throw new Error("An unexpected error occurred");
+  }
+};
+export const getQuizById = async (id: number, token: string) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/quiz/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error: any) {
+    if (axios.isAxiosError(error)) {
+      throw new Error(error.response?.data?.message || "Failed to fetch quiz");
+    }
+    throw new Error("An unexpected error occurred");
+  }
+};
+export const updateQuiz = async (
+  id: number,
+  quizData: {
+    title: string;
+    createdById: number;
+    questions: {
+      questionText: string;
+      optionA: string;
+      optionB: string;
+      optionC: string;
+      optionD: string;
+      correctOption: string;
+      explanation?: string;
+    }[];
+  },
+  token: string
+) => {
+  try {
+    const response = await axios.put(`${API_BASE_URL}/quiz/${id}`, quizData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+    return response.data;
+  } catch (error: any) {
+    if (axios.isAxiosError(error)) {
+      throw new Error(error.response?.data?.message || "Failed to update quiz");
+    }
+    throw new Error("An unexpected error occurred");
+  }
+};
+export const deleteQuiz = async (id: number, token: string) => {
+  try {
+    await axios.delete(`${API_BASE_URL}/quiz/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  } catch (error: any) {
+    if (axios.isAxiosError(error)) {
+      throw new Error(error.response?.data?.message || "Failed to delete quiz");
+    }
+    throw new Error("An unexpected error occurred");
+  }
+};
+export const submitQuiz = async (
+  userId: number,
+  quizId: number,
+  submissions: {
+    questionId: number;
+    selectedOption: string;
+    correctOption: string;
+  }[],
+  token: string
+) => {
+  try {
+    const response = await axios.post(
+      `${API_BASE_URL}/quiz/submit`,
+      { userId, quizId, submissions },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    return response.data;
+  } catch (error: any) {
+    if (axios.isAxiosError(error)) {
+      throw new Error(error.response?.data?.message || "Failed to submit quiz");
+    }
+    throw new Error("An unexpected error occurred");
+  }
+};

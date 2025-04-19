@@ -101,19 +101,21 @@ model Quiz {
 }
 
 model QuizQuestion {
-  id           Int    @id @default(autoincrement())
-  quiz         Quiz   @relation(fields: [quizId], references: [id])
+  id           Int     @id @default(autoincrement())
   quizId       Int
-
   questionText String
   optionA      String
   optionB      String
   optionC      String
   optionD      String
   correctOption String
+  explanation  String?
+  deleted      Boolean @default(false) 
+  quiz         Quiz    @relation(fields: [quizId], references: [id])
 
   QuizSubmission QuizSubmission[]
 }
+
 
 model QuizSubmission {
   id             Int    @id @default(autoincrement())

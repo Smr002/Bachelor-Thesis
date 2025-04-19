@@ -8,6 +8,7 @@ import problemRouter from "./problems/problemRouter";
 import { errorHandler } from "./middleware/errorHandler";
 import submissionRouter from "./submission/submissionRouter";
 import commentRouter from "./comment/commentRouter";
+import quizRouter from "./quiz/quizRouter";
 
 dotenv.config();
 
@@ -27,6 +28,7 @@ app.use("/users", userRoutes);
 app.use("/problems", problemRouter);
 app.use("/submission", submissionRouter);
 app.use("/comment", commentRouter);
+app.use("/quiz", quizRouter);
 app.use(errorHandler);
 app.use((req, res) => {
   res.status(404).json({ error: "Not found" });
