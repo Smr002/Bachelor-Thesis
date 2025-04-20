@@ -1,4 +1,4 @@
-﻿# 🎓 AlgoStruct – Bachelor Thesis Project
+﻿# 🎓 AlgoLearn – Bachelor Thesis Project
 
 This project is developed as part of my **Bachelor Thesis**, aiming to build an interactive learning platform inspired by LeetCode. It enables **students** to practice coding problems, **test their knowledge through quizzes**, and **explore Java data structures**, while **professors** can contribute by **adding problems and creating quizzes**.
 
