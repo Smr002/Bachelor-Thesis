@@ -92,6 +92,7 @@ model Quiz {
   id         Int      @id @default(autoincrement())
   title      String
   createdAt  DateTime @default(now())
+  deletedAt    DateTime?
 
   createdBy   User?    @relation("CreatedQuizzes", fields: [createdById], references: [id])
   createdById Int?

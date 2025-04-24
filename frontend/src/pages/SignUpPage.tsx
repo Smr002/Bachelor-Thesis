@@ -101,7 +101,7 @@ const SignUpPage = () => {
               Create an Account
             </CardTitle>
             <CardDescription className="text-center text-leetcode-text-secondary">
-              Enter your details to join AlgoStruct
+              Enter your details to join AlgoLearn
             </CardDescription>
           </CardHeader>
           <CardContent>

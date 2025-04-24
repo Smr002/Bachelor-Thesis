@@ -30,10 +30,14 @@ export class QuizRepository {
 
   async findAll() {
     return await prisma.quiz.findMany({
+      where: {
+        deletedAt: null,
+      },
       include: {
         questions: {
           where: { deleted: false },
         },
+        createdBy: true,
       },
     });
   }
@@ -128,8 +132,9 @@ export class QuizRepository {
   }
 
   async delete(id: number) {
-    await prisma.quiz.delete({
+    await prisma.quiz.update({
       where: { id },
+      data: { deletedAt: new Date() },
     });
   }
 

@@ -95,7 +95,7 @@ const Navbar = () => {
             to={navLink} // Use dynamic navLink based on token and role
             className="text-xl font-bold transition-colors hover:text-leetcode-blue"
           >
-            AlgoStruct
+            AlgoLearn
           </Link>
         </div>
 
