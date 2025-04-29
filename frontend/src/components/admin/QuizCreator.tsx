@@ -102,6 +102,7 @@ export const QuizCreator = () => {
           optionD: q.options[3],
           correctOption: ["A", "B", "C", "D"][q.correctAnswer],
           explanation: q.explanation,
+          code: q.code,
         })),
         createdById: 1,
         deletedQuestionIds,
@@ -432,7 +433,7 @@ export const QuizCreator = () => {
                       value={quizTitle}
                       onChange={(e) => setQuizTitle(e.target.value)}
                       className="bg-leetcode-bg-medium border-leetcode-bg-light text-leetcode-text-primary"
-                      placeholder="e.g., JavaScript Fundamentals"
+                      placeholder="e.g., Java Fundamentals"
                     />
                   </div>
 

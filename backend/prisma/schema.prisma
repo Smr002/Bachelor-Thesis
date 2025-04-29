@@ -93,7 +93,6 @@ model Quiz {
   title      String
   createdAt  DateTime @default(now())
   deletedAt    DateTime?
-
   createdBy   User?    @relation("CreatedQuizzes", fields: [createdById], references: [id])
   createdById Int?
 
@@ -111,6 +110,7 @@ model QuizQuestion {
   optionD      String
   correctOption String
   explanation  String?
+  code       String? 
   deleted      Boolean @default(false) 
   quiz         Quiz    @relation(fields: [quizId], references: [id])
 

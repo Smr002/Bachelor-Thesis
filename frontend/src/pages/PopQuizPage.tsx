@@ -59,7 +59,7 @@ const PopQuizPage = () => {
   const [quizCompleted, setQuizCompleted] = useState(false);
   const [submissions, setSubmissions] = useState<SubmissionEntry[]>([]);
   const [compilerCode, setCompilerCode] = useState(
-    '// Write your JavaScript code here\n\nfunction example() {\n  return "Hello, world!";\n}\n\nconsole.log(example());'
+    '// Write your Java code here\n\nfunction example() {\n  return "Hello, world!";\n}\n\nconsole.log(example());'
   );
   const [compilerOutput, setCompilerOutput] = useState("");
   const [isRunning, setIsRunning] = useState(false);
@@ -77,13 +77,15 @@ const PopQuizPage = () => {
           const mapped: QuizQuestion[] = randomQuiz.questions.map((q: any) => ({
             id: q.id,
             question: q.questionText,
-            code: q.code || undefined,
+            code: q.code || "",
             options: [q.optionA, q.optionB, q.optionC, q.optionD],
             correctAnswer: ["A", "B", "C", "D"].indexOf(q.correctOption),
             explanation: q.explanation || "",
           }));
           setQuizQuestions(mapped.sort(() => Math.random() - 0.5));
         }
+
+        console.log("Fetched quizzes:", quizzes);
       } catch (error: any) {
         toast({
           title: "Error fetching quiz",
@@ -408,12 +410,12 @@ const PopQuizPage = () => {
               <CardHeader>
                 <div className="flex justify-between items-center">
                   <CardTitle className="text-xl text-leetcode-text-primary">
-                    JavaScript Compiler
+                    Java Compiler
                   </CardTitle>
                   <Code className="h-5 w-5 text-leetcode-blue" />
                 </div>
                 <CardDescription className="text-leetcode-text-primary mt-2">
-                  Try out your JavaScript skills with this live code editor!
+                  Try out your Java skills with this live code editor!
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -422,7 +424,7 @@ const PopQuizPage = () => {
                     value={compilerCode}
                     onChange={(e) => setCompilerCode(e.target.value)}
                     className="w-full p-4 bg-leetcode-bg-dark text-leetcode-text-primary font-mono resize-none min-h-[200px] border-none focus-visible:ring-0"
-                    placeholder="// Write your JavaScript code here"
+                    placeholder="// Write your Java code here"
                   />
                 </div>
                 <div className="flex justify-end">

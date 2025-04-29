@@ -17,6 +17,7 @@ export class QuizRepository {
             optionD: q.optionD,
             correctOption: q.correctOption,
             explanation: q.explanation,
+            code: q.code,
           })),
         },
       },
@@ -68,6 +69,7 @@ export class QuizRepository {
         optionD: string;
         correctOption: string;
         explanation?: string;
+        code?: string;
       }[];
     }
   ) {
@@ -113,6 +115,7 @@ export class QuizRepository {
             optionC: q.optionC,
             optionD: q.optionD,
             correctOption: q.correctOption,
+            code: q.code,
             explanation: q.explanation || "",
             deleted: false, // In case it was soft deleted before and now reused
           },
