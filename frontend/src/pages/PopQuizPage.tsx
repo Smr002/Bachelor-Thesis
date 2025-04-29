@@ -59,7 +59,7 @@ const PopQuizPage = () => {
   const [quizCompleted, setQuizCompleted] = useState(false);
   const [submissions, setSubmissions] = useState<SubmissionEntry[]>([]);
   const [compilerCode, setCompilerCode] = useState(
-    '// Write your Java code here\n\nfunction example() {\n  return "Hello, world!";\n}\n\nconsole.log(example());'
+    '// Write your JavaScript code here\n\nfunction example() {\n  return "Hello, world!";\n}\n\nconsole.log(example());'
   );
   const [compilerOutput, setCompilerOutput] = useState("");
   const [isRunning, setIsRunning] = useState(false);
@@ -77,15 +77,13 @@ const PopQuizPage = () => {
           const mapped: QuizQuestion[] = randomQuiz.questions.map((q: any) => ({
             id: q.id,
             question: q.questionText,
-            code: q.code || "",
+            code: q.code || undefined,
             options: [q.optionA, q.optionB, q.optionC, q.optionD],
             correctAnswer: ["A", "B", "C", "D"].indexOf(q.correctOption),
             explanation: q.explanation || "",
           }));
           setQuizQuestions(mapped.sort(() => Math.random() - 0.5));
         }
-
-        console.log("Fetched quizzes:", quizzes);
       } catch (error: any) {
         toast({
           title: "Error fetching quiz",
@@ -405,56 +403,7 @@ const PopQuizPage = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.5 }}
-          >
-            <Card className="bg-leetcode-bg-medium border-leetcode-bg-light">
-              <CardHeader>
-                <div className="flex justify-between items-center">
-                  <CardTitle className="text-xl text-leetcode-text-primary">
-                    Java Compiler
-                  </CardTitle>
-                  <Code className="h-5 w-5 text-leetcode-blue" />
-                </div>
-                <CardDescription className="text-leetcode-text-primary mt-2">
-                  Try out your Java skills with this live code editor!
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="bg-leetcode-bg-dark rounded-md overflow-hidden">
-                  <Textarea
-                    value={compilerCode}
-                    onChange={(e) => setCompilerCode(e.target.value)}
-                    className="w-full p-4 bg-leetcode-bg-dark text-leetcode-text-primary font-mono resize-none min-h-[200px] border-none focus-visible:ring-0"
-                    placeholder="// Write your Java code here"
-                  />
-                </div>
-                <div className="flex justify-end">
-                  <Button
-                    onClick={handleRunCode}
-                    disabled={isRunning}
-                    className="bg-leetcode-green hover:bg-leetcode-green/90"
-                  >
-                    <Play className="h-4 w-4 mr-1" />
-                    Run Code
-                  </Button>
-                </div>
-                {compilerOutput && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    transition={{ duration: 0.3 }}
-                    className="bg-leetcode-bg-dark rounded-md p-4 overflow-x-auto"
-                  >
-                    <h3 className="text-sm font-medium mb-2 text-leetcode-text-secondary">
-                      Output:
-                    </h3>
-                    <pre className="text-sm text-leetcode-text-primary whitespace-pre-wrap">
-                      {compilerOutput}
-                    </pre>
-                  </motion.div>
-                )}
-              </CardContent>
-            </Card>
-          </motion.div>
+          ></motion.div>
         </motion.div>
       )}
     </motion.div>

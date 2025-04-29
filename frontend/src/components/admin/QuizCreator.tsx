@@ -493,9 +493,17 @@ export const QuizCreator = () => {
                           className="flex justify-between items-center p-2 rounded bg-leetcode-bg-medium border border-leetcode-bg-light"
                         >
                           <div className="flex-1 mr-4">
-                            <p className="text-sm text-leetcode-text-primary truncate">
-                              {index + 1}. {q.question}
-                            </p>
+                            <div className="flex-1 mr-4 min-w-0">
+                              <p
+                                className="text-sm text-leetcode-text-primary truncate"
+                                title={q.question}
+                              >
+                                {index + 1}.{" "}
+                                {q.question.length > 37
+                                  ? q.question.slice(0, 37) + "..."
+                                  : q.question}
+                              </p>
+                            </div>
                           </div>
                           <div className="flex space-x-1">
                             <Button
