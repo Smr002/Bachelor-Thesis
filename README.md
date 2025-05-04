@@ -14,16 +14,14 @@ An advanced, interactive coding education platform modeled after LeetCode. **Alg
    - [Frontend Installation](#frontend-installation)
    - [Backend Installation](#backend-installation)
 5. [Usage](#usage)
-6. [Testing](#testing)
-7. [Contributing](#contributing)
-8. [License](#license)
-9. [Contact](#contact)
+6. [Contributing](#contributing)
+7. [License](#license)
+8. [Contact](#contact)
 
 ---
 
 ## Features
 - **In-Browser Java Compiler**: Secure Docker-based sandbox for writing and executing Java code.
-- **Data Structures Library**: Interactive visualizations and implementations of arrays, linked lists, stacks, queues, trees, graphs, hash tables, and more.
 - **Quizzes & Assessments**: Time-bound multiple-choice quizzes with instant feedback and performance tracking.
 - **Algorithmic Challenges**: Real-time coding problems with integrated test cases, difficulty ratings, and solution hints.
 - **Professor Dashboard**: Intuitive interface for creating, editing, and publishing problems and quizzes.
